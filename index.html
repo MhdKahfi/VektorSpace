@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VektorSpace — Aljabar Linear Interaktif</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<style>
+:root {
+  --bg: #0a0a0f;
+  --bg2: #111118;
+  --bg3: #1a1a24;
+  --bg4: #22222f;
+  --surface: #1e1e2a;
+  --surface2: #252535;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --border3: rgba(255,255,255,0.22);
+  --text: #f0eff8;
+  --text2: #9896b0;
+  --text3: #5e5c78;
+  --accent: #7c6dff;
+  --accent2: #a594ff;
+  --accent3: #c8bfff;
+  --teal: #00d4aa;
+  --teal2: #00a888;
+  --gold: #ffb347;
+  --gold2: #ff9500;
+  --pink: #ff6b9d;
+  --green: #4ade80;
+  --red: #f87171;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  font-size: 16px;
+}
+[data-theme="light"] {
+  --bg: #f4f3ff;
+  --bg2: #eeecff;
+  --bg3: #e6e3ff;
+  --bg4: #ddd9ff;
+  --surface: #ffffff;
+  --surface2: #f8f7ff;
+  --border: rgba(0,0,0,0.07);
+  --border2: rgba(0,0,0,0.12);
+  --border3: rgba(0,0,0,0.22);
+  --text: #0d0b1a;
+  --text2: #4a4669;
+  --text3: #9896b0;
+  --accent: #6253ee;
+  --accent2: #7c6dff;
+  --accent3: #a594ff;
+  --teal: #009b7d;
+  --teal2: #00c9a0;
+  --gold: #d97706;
+  --gold2: #b45309;
+  --pink: #e0175b;
+  --green: #16a34a;
+  --red: #dc2626;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;overflow-x:hidden;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--accent);}
+
+/* ── NAV ── */
+nav {
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:62px;
+  background:rgba(10,10,15,0.85);
+  backdrop-filter:blur(24px) saturate(180%);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;
+  transition:background 0.3s;
+}
+[data-theme="light"] nav{background:rgba(244,243,255,0.88);}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);}
+.nav-logo-icon{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,var(--accent),var(--pink));
+  display:grid;place-items:center;flex-shrink:0;
+}
+.nav-logo-icon svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;}
+.nav-name{font-family:'Outfit',sans-serif;font-weight:700;font-size:1.15rem;letter-spacing:-.02em;}
+.nav-links{display:flex;align-items:center;gap:0.25rem;list-style:none;}
+.nav-links a{
+  font-size:.82rem;font-weight:500;color:var(--text2);
+  text-decoration:none;padding:6px 12px;border-radius:8px;
+  transition:all .2s;
+}
+.nav-links a:hover{color:var(--text);background:var(--bg3);}
+.nav-right{display:flex;align-items:center;gap:8px;}
+.theme-btn{
+  width:36px;height:36px;border-radius:9px;
+  background:var(--surface);border:1px solid var(--border2);
+  cursor:pointer;display:grid;place-items:center;
+  color:var(--text2);font-size:1rem;transition:all .2s;
+}
+.theme-btn:hover{color:var(--accent);border-color:var(--accent);}
+.nav-cta{
+  background:var(--accent);color:#fff;border:none;
+  padding:8px 18px;border-radius:8px;font-size:.82rem;
+  font-weight:600;cursor:pointer;transition:all .2s;
+  font-family:'Space Grotesk',sans-serif;letter-spacing:.01em;
+}
+.nav-cta:hover{background:var(--accent2);transform:translateY(-1px);}
+.hamburger{display:none;background:none;border:none;cursor:pointer;color:var(--text);padding:6px;}
+.hamburger svg{width:22px;height:22px;}
+.mobile-menu{
+  display:none;position:fixed;top:62px;left:0;right:0;
+  background:var(--bg2);border-bottom:1px solid var(--border2);
+  padding:1rem;z-index:199;flex-direction:column;gap:4px;
+}
+.mobile-menu.open{display:flex;}
+.mobile-menu a{
+  padding:12px 16px;border-radius:10px;color:var(--text2);
+  text-decoration:none;font-weight:500;transition:all .2s;
+}
+.mobile-menu a:hover{background:var(--bg3);color:var(--text);}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;padding-top:62px;
+  display:grid;grid-template-columns:1fr 1fr;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 70% 40%, rgba(124,109,255,0.12) 0%, transparent 60%),
+             radial-gradient(ellipse 60% 50% at 20% 80%, rgba(0,212,170,0.08) 0%, transparent 50%);
+  pointer-events:none;
+}
+.hero-left{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:4rem 3rem 4rem 4rem;position:relative;z-index:1;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(124,109,255,0.12);
+  border:1px solid rgba(124,109,255,0.25);
+  border-radius:100px;padding:6px 14px;
+  font-size:.72rem;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent2);
+  width:fit-content;margin-bottom:1.75rem;
+}
+.badge-pulse{
+  width:7px;height:7px;border-radius:50%;background:var(--teal);
+  box-shadow:0 0 0 0 rgba(0,212,170,0.4);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(0,212,170,0.4);}
+  70%{box-shadow:0 0 0 8px rgba(0,212,170,0);}
+  100%{box-shadow:0 0 0 0 rgba(0,212,170,0);}
+}
+.hero h1{
+  font-family:'Outfit',sans-serif;font-weight:800;
+  font-size:clamp(2.4rem,4.5vw,3.8rem);
+  line-height:1.05;letter-spacing:-.04em;margin-bottom:1.5rem;
+}
+.hero h1 .grad{
+  background:linear-gradient(135deg,var(--accent2),var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-desc{
+  font-size:1rem;line-height:1.8;color:var(--text2);
+  max-width:460px;margin-bottom:2.5rem;font-weight:400;
+}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;border:none;padding:13px 26px;border-radius:10px;
+  font-family:'Space Grotesk',sans-serif;font-size:.9rem;
+  font-weight:600;cursor:pointer;transition:all .25s;
+  box-shadow:0 4px 24px rgba(124,109,255,0.3);
+  letter-spacing:.01em;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(124,109,255,0.45);}
+.btn-ghost{
+  background:transparent;color:var(--text);
+  border:1px solid var(--border2);padding:13px 26px;border-radius:10px;
+  font-family:'Space Grotesk',sans-serif;font-size:.9rem;
+  font-weight:500;cursor:pointer;transition:all .25s;
+}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:rgba(124,109,255,0.07);}
+.hero-stats{
+  display:flex;gap:2.5rem;margin-top:3rem;
+  padding-top:2rem;border-top:1px solid var(--border);
+}
+.stat-val{
+  font-family:'Outfit',sans-serif;font-weight:700;
+  font-size:1.7rem;letter-spacing:-.03em;
+  background:linear-gradient(135deg,var(--text),var(--accent3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.stat-key{font-size:.75rem;color:var(--text3);margin-top:3px;}
+.hero-right{
+  position:relative;overflow:hidden;
+}
+#hero-canvas{width:100%;height:100%;display:block;}
+.hero-canvas-overlay{
+  position:absolute;bottom:1.5rem;right:1.5rem;
+  background:rgba(10,10,15,0.75);
+  backdrop-filter:blur(12px);
+  border:1px solid var(--border2);
+  border-radius:10px;padding:10px 14px;
+  font-size:.75rem;color:var(--text2);
+  pointer-events:none;
+}
+.hero-canvas-overlay strong{display:block;color:var(--accent2);margin-bottom:3px;font-size:.8rem;}
+.scroll-indicator{
+  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  font-size:.7rem;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;
+  animation:bounce 2.5s ease infinite;
+  z-index:2;
+}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(6px);}}
+.scroll-indicator svg{width:16px;height:16px;stroke:var(--text3);}
+
+/* ── SECTION COMMON ── */
+.section{padding:6rem 4rem;}
+.section-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent2);margin-bottom:1rem;
+}
+.section-tag::before{
+  content:'';display:block;width:20px;height:2px;
+  background:linear-gradient(90deg,var(--accent),var(--teal));
+  border-radius:2px;
+}
+.section h2{
+  font-family:'Outfit',sans-serif;font-weight:700;
+  font-size:clamp(1.7rem,3vw,2.4rem);
+  letter-spacing:-.03em;line-height:1.15;margin-bottom:1rem;
+}
+.section-sub{font-size:.95rem;color:var(--text2);line-height:1.75;max-width:560px;margin-bottom:2.5rem;}
+
+/* ── VISUALIZER ── */
+.viz-grid{
+  display:grid;grid-template-columns:1fr 320px;
+  gap:1.5rem;align-items:start;
+}
+.viz-stage{
+  background:var(--bg2);border-radius:var(--radius-lg);
+  border:1px solid var(--border);overflow:hidden;position:relative;
+  aspect-ratio:4/3;
+}
+#viz-canvas{width:100%;height:100%;display:block;cursor:grab;}
+#viz-canvas:active{cursor:grabbing;}
+.viz-hud{
+  position:absolute;top:12px;left:12px;
+  background:rgba(10,10,15,0.82);
+  backdrop-filter:blur(8px);
+  border:1px solid var(--border2);
+  border-radius:10px;padding:10px 14px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.73rem;line-height:1.7;color:var(--text2);
+  pointer-events:none;
+}
+.hud-val{color:var(--accent2);}
+.hud-val.gold{color:var(--gold);}
+.hud-val.teal{color:var(--teal);}
+.viz-mode-bar{
+  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+  display:flex;gap:6px;
+  background:rgba(10,10,15,0.88);
+  backdrop-filter:blur(12px);
+  border:1px solid var(--border2);border-radius:100px;
+  padding:5px;
+}
+.mode-btn{
+  padding:5px 13px;border-radius:100px;
+  font-size:.72rem;font-weight:600;cursor:pointer;
+  border:none;transition:all .2s;color:var(--text2);
+  background:transparent;font-family:'Space Grotesk',sans-serif;
+  white-space:nowrap;
+}
+.mode-btn.active{background:var(--accent);color:#fff;box-shadow:0 2px 12px rgba(124,109,255,0.4);}
+.mode-btn:hover:not(.active){color:var(--text);background:var(--bg3);}
+.viz-sidebar{display:flex;flex-direction:column;gap:1rem;}
+.viz-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.1rem;
+}
+.viz-card-title{
+  font-size:.78rem;font-weight:700;color:var(--text);
+  margin-bottom:.85rem;letter-spacing:.02em;text-transform:uppercase;
+  display:flex;align-items:center;gap:6px;
+}
+.viz-card-title span.dot{
+  width:8px;height:8px;border-radius:50%;
+}
+.dot.blue{background:var(--accent2);}
+.dot.gold{background:var(--gold);}
+.dot.teal{background:var(--teal);}
+.vec-row{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:6px;margin-bottom:6px;}
+.vec-label{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--text3);min-width:18px;}
+.vec-input{
+  width:100%;background:var(--bg3);border:1px solid var(--border);
+  border-radius:7px;padding:6px 9px;
+  font-family:'JetBrains Mono',monospace;font-size:.8rem;
+  color:var(--text);outline:none;transition:border-color .2s;
+}
+.vec-input:focus{border-color:var(--accent);}
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+.metric-chip{
+  background:var(--bg3);border-radius:8px;padding:8px 10px;
+  border:1px solid var(--border);
+}
+.metric-lbl{font-size:.65rem;color:var(--text3);margin-bottom:2px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;}
+.metric-val{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:600;color:var(--teal);}
+.viz-random-btn{
+  width:100%;background:transparent;border:1px dashed var(--border2);
+  border-radius:8px;padding:9px;color:var(--text2);
+  font-size:.78rem;cursor:pointer;transition:all .2s;margin-top:4px;
+  font-family:'Space Grotesk',sans-serif;font-weight:500;
+}
+.viz-random-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(124,109,255,0.07);}
+
+/* ── BRIDGE SECTION ── */
+.bridge-section{
+  background:var(--bg2);padding:5rem 4rem;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+}
+.bridge-inner{max-width:800px;margin:0 auto;text-align:center;}
+.bridge-inner p{font-size:.95rem;color:var(--text2);line-height:1.9;margin-bottom:2rem;}
+.spaces-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1rem;text-align:left;margin-top:2rem;
+}
+.space-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.1rem;
+  transition:all .25s;cursor:default;
+}
+.space-card:hover{border-color:var(--border2);transform:translateY(-3px);}
+.space-label{
+  font-family:'Outfit',sans-serif;font-weight:700;
+  font-size:1.3rem;letter-spacing:-.03em;margin-bottom:.4rem;
+}
+.space-desc{font-size:.78rem;color:var(--text2);line-height:1.65;}
+
+/* ── KURIKULUM ── */
+.curriculum-section{background:var(--bg);}
+.roadmap{display:flex;flex-direction:column;gap:0;}
+.road-level{
+  display:grid;grid-template-columns:72px 1fr;
+  gap:1.5rem;position:relative;
+}
+.level-spine{
+  display:flex;flex-direction:column;align-items:center;
+  padding-top:4px;
+}
+.level-badge{
+  width:44px;height:44px;border-radius:50%;
+  display:grid;place-items:center;
+  font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;
+  flex-shrink:0;position:relative;z-index:1;
+}
+.l1 .level-badge{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+.l2 .level-badge{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#fff;}
+.l3 .level-badge{background:linear-gradient(135deg,var(--teal2),var(--teal));color:#fff;}
+.spine-line{width:2px;flex:1;background:var(--border2);min-height:60px;margin-top:8px;}
+.road-level:last-child .spine-line{display:none;}
+.level-content{padding:0 0 3rem;}
+.level-tag{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem;}
+.l1 .level-tag{color:var(--accent2);}
+.l2 .level-tag{color:var(--gold);}
+.l3 .level-tag{color:var(--teal);}
+.level-title{
+  font-family:'Outfit',sans-serif;font-weight:700;
+  font-size:1.2rem;margin-bottom:.5rem;letter-spacing:-.02em;
+}
+.level-desc{font-size:.88rem;color:var(--text2);line-height:1.7;margin-bottom:1rem;}
+.chips{display:flex;flex-wrap:wrap;gap:7px;}
+.chip{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:100px;padding:6px 14px;
+  font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;color:var(--text2);
+}
+.chip:hover{border-color:var(--accent);color:var(--accent);}
+.chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* MATERI PANEL */
+.materi-wrap{margin-top:2rem;}
+.materi-panel{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:var(--radius-lg);padding:2rem;
+  display:none;animation:slideUp .35s ease;
+}
+.materi-panel.open{display:block;}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.materi-panel h4{
+  font-family:'Outfit',sans-serif;font-weight:700;
+  font-size:1.15rem;margin-bottom:1.2rem;
+  padding-bottom:.85rem;border-bottom:1px solid var(--border);
+}
+.materi-panel p{font-size:.9rem;line-height:1.85;color:var(--text2);margin-bottom:1rem;}
+.formula-block{
+  background:var(--bg);border-left:3px solid var(--accent);
+  border-radius:0 8px 8px 0;padding:14px 18px;
+  font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  line-height:1.9;color:var(--text);margin:1.25rem 0;overflow-x:auto;
+}
+.quiz-wrap{
+  background:var(--bg2);border-radius:10px;padding:1.5rem;
+  margin-top:1.5rem;border:1px solid var(--border);
+}
+.quiz-wrap h5{
+  font-size:.9rem;font-weight:700;margin-bottom:.3rem;font-family:'Outfit',sans-serif;
+}
+.quiz-wrap .quiz-q{font-size:.85rem;color:var(--text2);margin-bottom:1rem;line-height:1.65;}
+.quiz-options{display:flex;flex-direction:column;gap:8px;}
+.quiz-opt{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:9px;padding:11px 14px;
+  font-size:.85rem;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;font-weight:500;color:var(--text);
+}
+.quiz-opt:hover{border-color:var(--accent);color:var(--accent);background:rgba(124,109,255,0.06);}
+.quiz-opt.correct{background:rgba(74,222,128,0.1);border-color:var(--green);color:var(--green);}
+.quiz-opt.wrong{background:rgba(248,113,113,0.1);border-color:var(--red);color:var(--red);}
+.quiz-icon{
+  width:20px;height:20px;border-radius:50%;flex-shrink:0;
+  border:1.5px solid var(--border2);display:grid;place-items:center;
+  font-size:.7rem;font-weight:700;
+}
+.quiz-opt.correct .quiz-icon{background:var(--green);border-color:var(--green);color:#0a0a0f;}
+.quiz-opt.wrong .quiz-icon{background:var(--red);border-color:var(--red);color:#fff;}
+.quiz-feedback{
+  margin-top:10px;font-size:.82rem;font-weight:600;padding:9px 12px;
+  border-radius:7px;display:none;
+}
+.quiz-feedback.show{display:block;}
+.quiz-feedback.ok{background:rgba(74,222,128,0.12);color:var(--green);}
+.quiz-feedback.fail{background:rgba(248,113,113,0.12);color:var(--red);}
+
+/* ── KALKULATOR ── */
+.calc-section{background:var(--bg2);}
+.calc-tabs-row{
+  display:flex;gap:8px;margin-bottom:2rem;flex-wrap:wrap;
+}
+.calc-tab{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:10px;padding:10px 20px;
+  font-family:'Space Grotesk',sans-serif;font-size:.85rem;
+  font-weight:600;cursor:pointer;transition:all .2s;
+  color:var(--text2);
+}
+.calc-tab.active{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;border-color:transparent;
+  box-shadow:0 4px 16px rgba(124,109,255,0.3);
+}
+.calc-tab:not(.active):hover{border-color:var(--accent);color:var(--accent);}
+.calc-panel{display:none;}
+.calc-panel.active{display:block;}
+
+/* CALC EUCLIDES */
+.calc-layout{display:grid;grid-template-columns:1fr 280px;gap:1.5rem;align-items:start;}
+.calc-main{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem;}
+.calc-main h3{font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.3rem;}
+.calc-main .csub{font-size:.82rem;color:var(--text3);margin-bottom:1.5rem;}
+.field-g{margin-bottom:1.1rem;}
+.field-g label{display:block;font-size:.77rem;font-weight:700;color:var(--text2);margin-bottom:5px;letter-spacing:.04em;text-transform:uppercase;}
+.field-g input{
+  width:100%;background:var(--bg2);border:1px solid var(--border2);
+  border-radius:9px;padding:11px 14px;
+  font-family:'JetBrains Mono',monospace;font-size:.88rem;
+  color:var(--text);outline:none;transition:border-color .2s, box-shadow .2s;
+}
+.field-g input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,109,255,0.12);}
+.calc-run-btn{
+  width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;border:none;border-radius:9px;padding:13px;
+  font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:700;
+  cursor:pointer;transition:all .25s;margin-top:4px;
+  box-shadow:0 4px 20px rgba(124,109,255,0.25);letter-spacing:.01em;
+}
+.calc-run-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(124,109,255,0.4);}
+.calc-err{color:var(--red);font-size:.8rem;margin-top:8px;display:none;padding:9px 12px;background:rgba(248,113,113,0.1);border-radius:7px;border:1px solid rgba(248,113,113,0.2);}
+.calc-result{
+  background:var(--bg);border:1px solid var(--border2);
+  border-radius:10px;margin-top:1.25rem;
+  display:none;overflow:hidden;
+}
+.calc-result.show{display:block;}
+.result-header{
+  background:linear-gradient(135deg,rgba(124,109,255,0.15),rgba(0,212,170,0.1));
+  padding:12px 16px;border-bottom:1px solid var(--border);
+}
+.result-header .rh-title{font-size:.82rem;font-weight:700;color:var(--accent2);letter-spacing:.04em;text-transform:uppercase;}
+.result-rows{padding:4px 0;}
+.result-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:8px 16px;border-bottom:1px solid var(--border);font-size:.84rem;
+}
+.result-row:last-child{border-bottom:none;}
+.rr-label{color:var(--text2);}
+.rr-val{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--teal);}
+.rr-val.highlight{color:var(--gold);font-size:.95rem;}
+.calc-hint{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;}
+.calc-hint h3{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.5rem;}
+.calc-hint p{font-size:.82rem;color:var(--text2);line-height:1.7;margin-bottom:.75rem;}
+.hint-examples{display:flex;flex-direction:column;gap:5px;}
+.hex{
+  background:var(--bg2);border-radius:7px;padding:7px 10px;
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;
+  color:var(--text2);border:1px solid var(--border);
+}
+.hex span{color:var(--teal);}
+
+/* SUBSPACE CALC */
+.sub-layout{display:grid;grid-template-columns:1fr 260px;gap:1.5rem;}
+.sub-select-wrap{margin-bottom:1.25rem;}
+.sub-select{
+  width:100%;background:var(--bg2);border:1px solid var(--border2);
+  border-radius:9px;padding:11px 14px;
+  font-family:'Space Grotesk',sans-serif;font-size:.88rem;
+  color:var(--text);outline:none;cursor:pointer;
+  transition:border-color .2s;
+}
+.sub-select:focus{border-color:var(--accent);}
+.sub-steps{display:flex;flex-direction:column;gap:10px;margin-top:8px;}
+.step-card{
+  background:var(--bg2);border-radius:10px;padding:1rem 1.1rem;
+  border-left:3px solid var(--border);transition:all .25s;
+  border:1px solid var(--border);border-left-width:3px;
+}
+.step-card.ok{border-left-color:var(--green);}
+.step-card.fail{border-left-color:var(--red);}
+.step-header{display:flex;align-items:center;gap:8px;margin-bottom:.4rem;}
+.step-icon-badge{
+  width:22px;height:22px;border-radius:50%;
+  display:grid;place-items:center;font-size:.72rem;font-weight:700;flex-shrink:0;
+}
+.step-icon-badge.ok{background:rgba(74,222,128,0.2);color:var(--green);}
+.step-icon-badge.fail{background:rgba(248,113,113,0.2);color:var(--red);}
+.step-name{font-size:.85rem;font-weight:700;color:var(--text);}
+.step-detail{font-size:.8rem;color:var(--text2);line-height:1.65;font-family:'JetBrains Mono',monospace;background:var(--bg);padding:8px 10px;border-radius:6px;margin-top:6px;}
+.verdict{
+  display:flex;align-items:flex-start;gap:10px;
+  border-radius:10px;padding:14px 16px;margin-top:12px;
+  font-size:.9rem;font-weight:700;font-family:'Outfit',sans-serif;
+}
+.verdict.yes{background:rgba(74,222,128,0.1);color:var(--green);border:1px solid rgba(74,222,128,0.25);}
+.verdict.no{background:rgba(248,113,113,0.1);color:var(--red);border:1px solid rgba(248,113,113,0.25);}
+.verdict-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px;}
+.sub-info{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;}
+.sub-info h3{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.75rem;}
+.axiom-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:.6rem;font-size:.82rem;color:var(--text2);line-height:1.6;}
+.axiom-num{
+  background:linear-gradient(135deg,var(--accent),var(--teal));
+  color:#fff;width:20px;height:20px;border-radius:50%;
+  display:grid;place-items:center;font-size:.7rem;font-weight:700;flex-shrink:0;
+}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--bg);border-top:1px solid var(--border);
+  padding:3rem 4rem;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  flex-wrap:wrap;gap:2rem;
+}
+.footer-brand .brand-name{
+  font-family:'Outfit',sans-serif;font-weight:700;
+  font-size:1.1rem;margin-bottom:.3rem;
+}
+.footer-brand p{font-size:.8rem;color:var(--text3);line-height:1.6;}
+.footer-links{display:flex;flex-direction:column;gap:6px;}
+.footer-links a{font-size:.82rem;color:var(--text2);text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--accent2);}
+.footer-copy{font-size:.75rem;color:var(--text3);align-self:flex-end;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;}
+  .hero-right{height:300px;}
+  .hero-left{padding:3rem 1.5rem;}
+  .viz-grid{grid-template-columns:1fr;}
+  .calc-layout,.sub-layout{grid-template-columns:1fr;}
+  .spaces-grid{grid-template-columns:1fr 1fr;}
+  .road-level{grid-template-columns:54px 1fr;gap:1rem;}
+  .section{padding:4rem 1.5rem;}
+  .bridge-section{padding:4rem 1.5rem;}
+  footer{padding:2.5rem 1.5rem;}
+  nav{padding:0 1.25rem;}
+  .nav-links{display:none;}
+  .hamburger{display:block;}
+  .viz-mode-bar{flex-wrap:wrap;bottom:8px;width:calc(100% - 24px);justify-content:center;}
+}
+@media(max-width:560px){
+  .spaces-grid{grid-template-columns:1fr;}
+  .hero h1{font-size:2rem;}
+  .hero-stats{gap:1.5rem;}
+  .metrics-grid{grid-template-columns:1fr;}
+}
+
+/* FADE ANIMATION */
+.fade-up{opacity:0;transform:translateY(20px);transition:opacity .6s ease, transform .6s ease;}
+.fade-up.visible{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav>
+  <a class="nav-brand" href="#">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 18 18"><polyline points="2,16 9,4 16,12"/><line x1="2" y1="16" x2="16" y2="12"/></svg>
+    </div>
+    <span class="nav-name">VektorSpace</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#visualizer">Visualisasi</a></li>
+    <li><a href="#kurikulum">Kursus</a></li>
+    <li><a href="#kalkulator">Kalkulator</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="theme-btn" id="theme-toggle" title="Toggle tema" aria-label="Toggle dark/light mode">☀️</button>
+    <button class="nav-cta" onclick="document.getElementById('visualizer').scrollIntoView({behavior:'smooth'})">Mulai →</button>
+    <button class="hamburger" id="hamburger" aria-label="Buka menu">
+      <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="19" y2="6"/><line x1="3" y1="11" x2="19" y2="11"/><line x1="3" y1="16" x2="19" y2="16"/></svg>
+    </button>
+  </div>
+</nav>
+<nav class="mobile-menu" id="mobile-menu">
+  <a href="#visualizer" onclick="closeMobileMenu()">🔭 Visualisasi 3D</a>
+  <a href="#kurikulum" onclick="closeMobileMenu()">📚 Kursus Kilat</a>
+  <a href="#kalkulator" onclick="closeMobileMenu()">🧮 Kalkulator</a>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero" id="hero">
+  <div class="hero-left">
+    <div class="hero-badge">
+      <span class="badge-pulse"></span>
+      Platform Pembelajaran Interaktif
+    </div>
+    <h1>Melihat serta <br><span class="grad">Memahami</span> Aljabar<br>Linear.</h1>
+    <p class="hero-desc">Dari visualisasi konkret ℝ² dan ℝ³ yang nyata, hingga keindahan aksioma abstrak ruang-n dimensi. Matematika bukan hafalan — ini eksplorasi.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="document.getElementById('visualizer').scrollIntoView({behavior:'smooth'})">Mulai Belajar →</button>
+      <button class="btn-ghost" onclick="document.getElementById('kalkulator').scrollIntoView({behavior:'smooth'})">Buka Kalkulator</button>
+    </div>
+    <div class="hero-stats">
+      <div><div class="stat-val">3</div><div class="stat-key">Level Hierarki</div></div>
+      <div><div class="stat-val">6+</div><div class="stat-key">Modul Kursus</div></div>
+      <div><div class="stat-val">2</div><div class="stat-key">Tool Pro</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-canvas-overlay">
+      <strong>Ruang Vektor Geometris</strong>
+      Basis Berotasi · ℝ³ Spasial
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <span>Scroll</span>
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4,6 8,10 12,6"/></svg>
+  </div>
+</section>
+
+<!-- ─── VISUALIZER ─── -->
+<section class="section" id="visualizer">
+  <div class="section-tag">01 · Visualizer Interaktif</div>
+  <h2>Ruang Tiga Dimensi (ℝ³)</h2>
+  <p class="section-sub">Drag untuk memutar, scroll untuk zoom. Ubah komponen koordinat v₁ dan v₂ untuk transformasi real-time.</p>
+
+  <div class="viz-grid fade-up">
+    <div class="viz-stage">
+      <canvas id="viz-canvas"></canvas>
+      <div class="viz-hud" id="viz-hud">
+        v₁ = (<span class="hud-val" id="hud-v1">1.00, 2.00, 0.00</span>)<br>
+        v₂ = (<span class="hud-val gold" id="hud-v2">-1.00, 1.00, 1.00</span>)<br>
+        θ = <span class="hud-val teal" id="hud-angle">71.6°</span>&nbsp;&nbsp;
+        v₁·v₂ = <span class="hud-val" id="hud-dot">1.000</span>
+      </div>
+      <div class="viz-mode-bar">
+        <button class="mode-btn active" onclick="setMode(this,'vectors')">Vektor</button>
+        <button class="mode-btn" onclick="setMode(this,'span')">Span / Kombinasi</button>
+        <button class="mode-btn" onclick="setMode(this,'subspace')">Subruang</button>
+        <button class="mode-btn" onclick="setMode(this,'projection')">Proyeksi</button>
+      </div>
+    </div>
+
+    <div class="viz-sidebar">
+      <div class="viz-card">
+        <div class="viz-card-title"><span class="dot blue"></span> Vektor v₁ (Biru)</div>
+        <div class="vec-row"><span class="vec-label">x</span><input class="vec-input" id="v1x" type="number" value="1" step="0.5" oninput="updateVectors()"></div>
+        <div class="vec-row"><span class="vec-label">y</span><input class="vec-input" id="v1y" type="number" value="2" step="0.5" oninput="updateVectors()"></div>
+        <div class="vec-row"><span class="vec-label">z</span><input class="vec-input" id="v1z" type="number" value="0" step="0.5" oninput="updateVectors()"></div>
+      </div>
+      <div class="viz-card">
+        <div class="viz-card-title"><span class="dot gold"></span> Vektor v₂ (Emas)</div>
+        <div class="vec-row"><span class="vec-label">x</span><input class="vec-input" id="v2x" type="number" value="-1" step="0.5" oninput="updateVectors()"></div>
+        <div class="vec-row"><span class="vec-label">y</span><input class="vec-input" id="v2y" type="number" value="1" step="0.5" oninput="updateVectors()"></div>
+        <div class="vec-row"><span class="vec-label">z</span><input class="vec-input" id="v2z" type="number" value="1" step="0.5" oninput="updateVectors()"></div>
+      </div>
+      <div class="viz-card">
+        <div class="viz-card-title"><span class="dot teal"></span> Metrik Analitis</div>
+        <div class="metrics-grid">
+          <div class="metric-chip"><div class="metric-lbl">‖v₁‖</div><div class="metric-val" id="m-n1">2.236</div></div>
+          <div class="metric-chip"><div class="metric-lbl">‖v₂‖</div><div class="metric-val" id="m-n2">1.732</div></div>
+          <div class="metric-chip"><div class="metric-lbl">v₁·v₂</div><div class="metric-val" id="m-dot">1.000</div></div>
+          <div class="metric-chip"><div class="metric-lbl">cos θ</div><div class="metric-val" id="m-cos">0.258</div></div>
+        </div>
+        <button class="viz-random-btn" onclick="randomVectors()">↺ Acak Nilai Vektor</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── BRIDGE ─── -->
+<div class="bridge-section fade-up">
+  <div class="bridge-inner">
+    <div class="section-tag" style="justify-content:center;">Perluasan Abstrak</div>
+    <h2>Dari Geometri Menuju Ruang Abstrak</h2>
+    <p>Ketika kita melihat ruang 3D di atas, kita mengandalkan intuisi geometris. Tapi pola operasi tersebut diekstrak menjadi aturan formal. Di ℝⁿ, kita kehilangan pandangan mata — namun logika perhitungan tetap sama persis!</p>
+    <div class="spaces-grid">
+      <div class="space-card"><div class="space-label" style="color:var(--accent2);">ℝ²</div><div class="space-desc">Pasangan (x,y). Dapat digambar nyata di bidang dua dimensi.</div></div>
+      <div class="space-card"><div class="space-label" style="color:var(--gold);">ℝ³</div><div class="space-desc">Triple (x,y,z). Batas fisik visualisasi spasial manusia.</div></div>
+      <div class="space-card"><div class="space-label" style="color:var(--teal);">ℝⁿ</div><div class="space-desc">n-tupel terurut. Tak terlihat mata, tapi terhitung via aljabar.</div></div>
+      <div class="space-card"><div class="space-label" style="color:var(--pink);">V</div><div class="space-desc">Abstraksi total: fungsi, matriks, polinomial yang patuh 10 aksioma.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── KURIKULUM ─── -->
+<section class="section curriculum-section" id="kurikulum">
+  <div class="section-tag">02 · E-Learning</div>
+  <h2>Kursus Kilat Hierarki</h2>
+  <p class="section-sub">Klik topik di bawah untuk membuka materi mendalam dan kuis interaktif.</p>
+
+  <div class="roadmap fade-up">
+    <!-- Level 1 -->
+    <div class="road-level l1">
+      <div class="level-spine"><div class="level-badge">1</div><div class="spine-line"></div></div>
+      <div class="level-content">
+        <div class="level-tag">Level 1</div>
+        <div class="level-title">Pengenalan Vektor & Ruang n-Euclides</div>
+        <p class="level-desc">Properti dasar koordinat n-dimensi, jarak, dot product, proyeksi ortogonal.</p>
+        <div class="chips">
+          <div class="chip" data-target="mat-jarak" onclick="openMateri(this)">Jarak Euklides di ℝⁿ</div>
+          <div class="chip" data-target="mat-dot" onclick="openMateri(this)">Dot Product & Sudut</div>
+          <div class="chip" data-target="mat-proyeksi" onclick="openMateri(this)">Proyeksi Ortogonal</div>
+          <div class="chip" data-target="mat-norm" onclick="openMateri(this)">Norm & Vektor Unit</div>
+          <div class="chip" data-target="mat-orto" onclick="openMateri(this)">Ortogonalitas & Basis Ortonormal</div>
+          <div class="chip" data-target="mat-kombinasilinear" onclick="openMateri(this)">Kombinasi Linear</div>
+        </div>
+      </div>
+    </div>
+    <!-- Level 2 -->
+    <div class="road-level l2">
+      <div class="level-spine"><div class="level-badge">2</div><div class="spine-line"></div></div>
+      <div class="level-content">
+        <div class="level-tag">Level 2</div>
+        <div class="level-title">Abstraksi ke Ruang Vektor Umum</div>
+        <p class="level-desc">Meninggalkan geometris murni, masuk ke struktur aljabar umum & validasi 10 aksioma.</p>
+        <div class="chips">
+          <div class="chip" data-target="mat-aksioma" onclick="openMateri(this)">10 Aksioma Ruang Vektor</div>
+          <div class="chip" data-target="mat-noneuclid" onclick="openMateri(this)">Contoh Matriks & Fungsi</div>
+          <div class="chip" data-target="mat-ketergantungan" onclick="openMateri(this)">Ketergantungan Linear</div>
+          <div class="chip" data-target="mat-basis" onclick="openMateri(this)">Basis & Dimensi Ruang</div>
+          <div class="chip" data-target="mat-transformasi" onclick="openMateri(this)">Transformasi Linear</div>
+        </div>
+      </div>
+    </div>
+    <!-- Level 3 -->
+    <div class="road-level l3">
+      <div class="level-spine"><div class="level-badge">3</div><div class="spine-line"></div></div>
+      <div class="level-content">
+        <div class="level-tag">Level 3</div>
+        <div class="level-title">Subruang (Subspaces)</div>
+        <p class="level-desc">Menganalisis himpunan bagian dari ruang vektor dan membuktikan kelayakannya.</p>
+        <div class="chips">
+          <div class="chip" data-target="mat-subruang" onclick="openMateri(this)">4 Kriteria Ringkas Subruang</div>
+          <div class="chip" data-target="mat-span" onclick="openMateri(this)">Span Himpunan Vektor</div>
+          <div class="chip" data-target="mat-kernel" onclick="openMateri(this)">Kernel & Image Transformasi</div>
+          <div class="chip" data-target="mat-nilspace" onclick="openMateri(this)">Ruang Nol & Ruang Kolom</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Materi Panels -->
+  <div class="materi-wrap" id="materi-display">
+
+    <div class="materi-panel" id="mat-jarak">
+      <h4>📏 Jarak Euklides di Ruang n-Dimensi (ℝⁿ)</h4>
+      <p>Dua titik/vektor u = (u₁, …, uₙ) dan v = (v₁, …, vₙ) di ℝⁿ. Jarak diturunkan langsung dari teorema Pythagoras yang diekstrak ke n dimensi:</p>
+      <div class="formula-block">d(u, v) = √[ (u₁−v₁)² + (u₂−v₂)² + ··· + (uₙ−vₙ)² ]</div>
+      <p>Magnitudo (panjang) vektor tunggal u disebut <strong>Norm Euklides</strong>, dinotasikan ‖u‖ = d(u, 0):</p>
+      <div class="formula-block">‖u‖ = √[ u₁² + u₂² + ··· + uₙ² ]</div>
+      <p><strong>Sifat-sifat penting jarak:</strong> d(u,v) ≥ 0, d(u,v) = 0 hanya jika u = v, d(u,v) = d(v,u), dan pertidaksamaan segitiga d(u,w) ≤ d(u,v) + d(v,w).</p>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 1 — Hitung Jarak di ℝ²</h5>
+        <p class="quiz-q">Berapakah d(u,v) antara u = (1, 3) dan v = (4, −1) di ℝ²?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>A. 5.000 — √[(4−1)² + (−1−3)²] = √[9+16] = √25 = 5 ✓</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>B. 7.000</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>C. √7</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 2 — Norm di ℝ³</h5>
+        <p class="quiz-q">Berapakah ‖u‖ untuk u = (2, −1, 2) di ℝ³?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>A. 5</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>B. 3 — √[4 + 1 + 4] = √9 = 3 ✓</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>C. √5</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 3 — Sifat Jarak</h5>
+        <p class="quiz-q">Jika d(u, v) = 0, apa yang dapat disimpulkan?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>A. Vektor u dan v saling ortogonal</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>B. u = v — jarak nol berarti kedua vektor identik ✓</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>C. Salah satu vektor adalah nol</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </div>
+
+    <div class="materi-panel" id="mat-dot">
+      <h4>⚡ Dot Product & Sudut Spasial</h4>
+      <p>Hasil kali dalam standar menghasilkan nilai skalar dengan mengalikan elemen posisi yang bersesuaian:</p>
+      <div class="formula-block">u · v = u₁v₁ + u₂v₂ + ··· + uₙvₙ</div>
+      <p>Secara geometris di ℝ² / ℝ³, nilai ini menghubungkan magnitudo kedua vektor dengan kosinus sudut θ:</p>
+      <div class="formula-block">u · v = ‖u‖ ‖v‖ cos(θ)  ⟹  cos(θ) = (u · v) / (‖u‖ ‖v‖)</div>
+      <p>Jika u · v = 0 untuk dua vektor tak-nol → sudut θ = 90° → disebut <strong>Ortogonal</strong>. Jika u · v > 0 maka θ lancip (< 90°). Jika u · v < 0 maka θ tumpul (> 90°).</p>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 1 — Ortogonalitas</h5>
+        <p class="quiz-q">Vektor p = (2, 3, −1) dan q = (1, 1, 5) di ℝ³. Bagaimana hubungan geometrisnya?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>Ortogonal — p·q = (2)(1)+(3)(1)+(−1)(5) = 2+3−5 = 0 ✓</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>Sejajar berhimpit</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>Sudut tumpul (> 90°)</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 2 — Hitung Dot Product</h5>
+        <p class="quiz-q">Berapakah u · v untuk u = (3, −2, 1) dan v = (1, 4, 2)?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>A. 10</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>B. 0</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>C. −3 — (3)(1)+(−2)(4)+(1)(2) = 3−8+2 = −3 ✓</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 3 — Interpretasi Sudut</h5>
+        <p class="quiz-q">Jika u · v = −15 dan ‖u‖‖v‖ = 15, berapa besar sudut antara u dan v?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>A. 0° (sejajar searah)</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>B. 90° (ortogonal)</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>C. 180° — cos θ = −15/15 = −1 → θ = 180° (berlawanan arah) ✓</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </div>
+
+    <div class="materi-panel" id="mat-proyeksi">
+      <h4>🎯 Proyeksi Ortogonal Vektor</h4>
+      <p>Proyeksi u pada arah v menghasilkan vektor yang terletak tepat di sepanjang garis v. Bayangkan "bayangan" vektor u yang jatuh tegak lurus ke arah v:</p>
+      <div class="formula-block">proj_v(u) = [ (u · v) / ‖v‖² ] · v</div>
+      <p>Komponen skalar (panjang bertanda proyeksi):</p>
+      <div class="formula-block">comp_v(u) = (u · v) / ‖v‖</div>
+      <p><strong>Sisa/residu</strong> setelah proyeksi (komponen ortogonal): u − proj_v(u), dan vektor ini dijamin tegak lurus v.</p>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 1 — Proyeksi dengan u Ortogonal</h5>
+        <p class="quiz-q">Jika u dan v saling ortogonal, berapa nilai proj_v(u)?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>A. Sama dengan ‖u‖</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>B. Vektor Nol — karena u·v = 0, pembilang = nol ✓</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>C. Sama dengan u itu sendiri</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 2 — Hitung proj_v(u)</h5>
+        <p class="quiz-q">u = (3, 4), v = (1, 0). Berapakah proj_v(u)?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>A. (3, 0) — u·v = 3, ‖v‖² = 1, jadi proj = (3/1)·(1,0) = (3,0) ✓</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>B. (0, 4)</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>C. (3, 4)</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 3 — Komponen Ortogonal</h5>
+        <p class="quiz-q">Dari soal di atas, berapakah komponen ortogonal u terhadap v (u − proj_v(u))?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>A. (3, 0)</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>B. (0, 0)</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>C. (0, 4) — (3,4) − (3,0) = (0,4) ✓ dan (0,4)·(1,0) = 0 (terbukti ortogonal)</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </div>
+
+    <div class="materi-panel" id="mat-norm">
+      <h4>📐 Norm & Vektor Unit</h4>
+      <p>Norm adalah "ukuran panjang" suatu vektor. Dari norm, kita bisa membuat <strong>vektor unit</strong> — vektor yang panjangnya tepat 1 dan menunjuk ke arah yang sama:</p>
+      <div class="formula-block">û = u / ‖u‖  (vektor unit searah u)</div>
+      <p><strong>Normalisasi</strong> adalah proses mengubah vektor apapun menjadi vektor unit. Berguna dalam komputasi grafis, machine learning, dan fisika — di mana arah lebih penting dari panjang.</p>
+      <div class="formula-block">‖û‖ = 1  (terbukti: ‖u/‖u‖‖ = ‖u‖/‖u‖ = 1)</div>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 1 — Normalisasi</h5>
+        <p class="quiz-q">u = (0, 3). Berapakah vektor unit û ?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>A. (0, 3)</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>B. (0, 1) — ‖u‖ = 3, û = (0/3, 3/3) = (0, 1) ✓</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>C. (0, 1/3)</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 2 — Panjang Vektor Unit</h5>
+        <p class="quiz-q">Berapakah ‖û‖ untuk vektor unit manapun?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>A. Selalu 1 — itulah definisi vektor unit ✓</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>B. Bergantung pada arahnya</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>C. Nol</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 3 — Vektor Unit di ℝ³</h5>
+        <p class="quiz-q">v = (2, 2, 1). Berapakah ‖v‖?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>A. 5</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>B. 3 — √[4+4+1] = √9 = 3 ✓</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>C. √5</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </div>
+
+    <div class="materi-panel" id="mat-orto">
+      <h4>🔲 Ortogonalitas & Basis Ortonormal</h4>
+      <p>Sekumpulan vektor disebut <strong>ortonormal</strong> jika setiap vektor berpanjang 1 dan saling tegak lurus satu sama lain:</p>
+      <div class="formula-block">‖eᵢ‖ = 1  untuk semua i  (unit)<br>eᵢ · eⱼ = 0  untuk i ≠ j  (ortogonal)</div>
+      <p>Basis ortonormal sangat berguna karena koordinat suatu vektor terhadap basis tersebut dapat dihitung langsung dengan dot product: cᵢ = v · eᵢ. Ini membuat dekomposisi vektor jauh lebih mudah.</p>
+      <div class="formula-block">Contoh basis ortonormal standar ℝ³:<br>e₁=(1,0,0), e₂=(0,1,0), e₃=(0,0,1)</div>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 1 — Identifikasi Ortonormal</h5>
+        <p class="quiz-q">Apakah {(1,0), (0,1)} di ℝ² adalah basis ortonormal?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>A. Ya — keduanya berunit 1 dan (1,0)·(0,1) = 0 ✓</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>B. Tidak — bukan basis yang valid</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 2 — Koordinat via Dot Product</h5>
+        <p class="quiz-q">v = (5, 3). Berapa koordinat v terhadap e₁ = (1,0)?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>A. 5 — c₁ = v · e₁ = (5)(1)+(3)(0) = 5 ✓</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>B. 3</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>C. √34</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </div>
+
+    <div class="materi-panel" id="mat-kombinasilinear">
+      <h4>🔗 Kombinasi Linear</h4>
+      <p>Vektor w disebut <strong>kombinasi linear</strong> dari v₁, v₂, …, vₖ jika ada skalar c₁, c₂, …, cₖ sehingga:</p>
+      <div class="formula-block">w = c₁v₁ + c₂v₂ + ··· + cₖvₖ</div>
+      <p>Konsep ini adalah fondasi seluruh aljabar linear. Pertanyaan "dapatkah w dibentuk dari v₁, v₂, …, vₖ?" sama artinya dengan "apakah w adalah kombinasi linear dari vektor-vektor tersebut?"</p>
+      <p><strong>Contoh:</strong> Di ℝ², vektor (5, 2) = 3·(1,0) + 2·(1,1) karena 3(1,0) + 2(1,1) = (3,0)+(2,2) = (5,2). ✓</p>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 1 — Identifikasi</h5>
+        <p class="quiz-q">Apakah (4, 6) merupakan kombinasi linear dari (1, 0) dan (0, 1)?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>A. Ya — (4,6) = 4·(1,0) + 6·(0,1) ✓</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>B. Tidak — tidak bisa dibentuk dari dua vektor tersebut</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 2 — Hitung Koefisien</h5>
+        <p class="quiz-q">w = (7, 3) = c₁·(1, 0) + c₂·(0, 1). Berapakah c₁ dan c₂?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>A. c₁ = 3, c₂ = 7</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>B. c₁ = 7, c₂ = 3 — karena (7)(1,0)+(3)(0,1) = (7,3) ✓</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>C. c₁ = 1, c₂ = 1</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis 3 — Sifat Penting</h5>
+        <p class="quiz-q">Vektor nol 0 = (0,0,...,0) selalu merupakan kombinasi linear dari vektor apapun. Mengapa?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>A. Ambil semua koefisien cᵢ = 0, maka 0·v₁ + 0·v₂ + ··· = 0 ✓</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>B. Karena vektor nol ada di semua ruang vektor</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </div>
+      <h4>⚖️ 10 Aksioma Formal Ruang Vektor</h4>
+      <p>Himpunan non-kosong V adalah <strong>Ruang Vektor</strong> jika memenuhi 10 aksioma berikut secara mutlak:</p>
+      <div class="formula-block">— Penjumlahan —<br>
+1. Tertutup: u,v ∈ V ⟹ u⊕v ∈ V<br>
+2. Komutatif: u⊕v = v⊕u<br>
+3. Asosiatif: (u⊕v)⊕w = u⊕(v⊕w)<br>
+4. Identitas Nol: ∃ 0∈V, u⊕0 = u<br>
+5. Invers: ∃ −u∈V, u⊕(−u) = 0<br><br>
+— Perkalian Skalar —<br>
+6. Tertutup: k skalar, u∈V ⟹ k⊙u ∈ V<br>
+7. Distributif I: k⊙(u⊕v) = (k⊙u)⊕(k⊙v)<br>
+8. Distributif II: (k+m)⊙u = (k⊙u)⊕(m⊙u)<br>
+9. Asosiatif Skalar: k⊙(m⊙u) = (km)⊙u<br>
+10. Identitas Skalar: 1⊙u = u</div>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis Level 2</h5>
+        <p class="quiz-q">Apakah himpunan seluruh matriks 2×2 (M₂₂) dengan operasi standar merupakan Ruang Vektor?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>Ya — memenuhi kesepuluh aksioma tanpa ada yang gagal</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>Bukan Ruang Vektor</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </div>
+
+    <div class="materi-panel" id="mat-noneuclid">
+      <h4>🔭 Ruang Vektor Non-Euclides</h4>
+      <p><strong>1. Ruang Polinomial (Pₙ):</strong> Himpunan semua fungsi polinomial dengan derajat ≤ n. Contoh di P₂: p(x) = 2x² − 3x + 5. Penjumlahan dua polinomial menghasilkan polinomial baru berderajat ≤ n.</p>
+      <p><strong>2. Ruang Fungsi Kontinu C[a, b]:</strong> Himpunan seluruh fungsi real yang kontinu pada interval [a, b]. Penjumlahan f(x) + g(x) dijamin menghasilkan fungsi kontinu baru.</p>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis Level 2</h5>
+        <p class="quiz-q">Manakah "vektor identitas nol" di Ruang Vektor P₂?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>A. Skalar angka 0</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>B. Polinomial nol: p(x) = 0x² + 0x + 0</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </div>
+
+    <div class="materi-panel" id="mat-subruang">
+      <h4>🧩 Subruang & 4 Kriteria Ringkas</h4>
+      <p>Untuk membuktikan subset W ⊆ V adalah subruang, <strong>tidak perlu</strong> menguji 10 aksioma dari awal. Cukup validasi 3 kriteria ini:</p>
+      <div class="formula-block">1. W ≠ ∅ — wajib memuat vektor nol induk: 0 ∈ W<br>2. Tertutup Penjumlahan: u,v ∈ W ⟹ u+v ∈ W<br>3. Tertutup Perkalian Skalar: u ∈ W, k real ⟹ k·u ∈ W<br>4.Jika u ∈ W dan k ∈ R, maka ku ∈ W<div>
+      <p>Jika satu saja kriteria dilanggar → W <strong>bukan</strong> subruang.</p>
+      <div class="quiz-wrap">
+        <h5>🎯 Kuis Level 3</h5>
+        <p class="quiz-q">Apakah W = {(x,y) | x ≥ 0} merupakan subruang dari ℝ²?</p>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="doQuiz(this,false)"><span>A. Ya, merupakan subruang</span><span class="quiz-icon"></span></div>
+          <div class="quiz-opt" onclick="doQuiz(this,true)"><span>B. Bukan — gagal uji skalar negatif: u=(1,2), k=−2 → (−2,−4) ∉ W</span><span class="quiz-icon"></span></div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── KALKULATOR ─── -->
+<section class="section calc-section" id="kalkulator">
+  <div class="section-tag">03 · Math Toolkit</div>
+  <h2>Kalkulator Langkah-demi-Langkah</h2>
+  <p class="section-sub">Validasi pengerjaan tugas kuliah secara instan dengan paparan analisis logis lengkap.</p>
+
+  <div class="calc-tabs-row">
+    <button class="calc-tab active" onclick="switchCalc(this,'euclid')">📐 Metrik Ruang-n Euclides</button>
+    <button class="calc-tab" onclick="switchCalc(this,'subspace')">🔍 Pembuktian Subruang</button>
+  </div>
+
+  <!-- KALKULATOR EUCLIDES -->
+  <div class="calc-panel active" id="calc-euclid">
+    <div class="calc-layout fade-up">
+      <div class="calc-main">
+        <h3>Metrik Vektor Dimensi-n</h3>
+        <p class="csub">Masukkan komponen dipisah koma untuk dimensi apa pun (ℝ², ℝ³, ℝ⁴, …)</p>
+        <div class="field-g">
+          <label>Komponen Vektor u</label>
+          <input type="text" id="eu-u" placeholder="Contoh: 1, 2, 0, -3" value="1, 2, 0">
+        </div>
+        <div class="field-g">
+          <label>Komponen Vektor v</label>
+          <input type="text" id="eu-v" placeholder="Contoh: -1, 3, 2, 5" value="-1, 1, 1">
+        </div>
+        <button class="calc-run-btn" onclick="calcEuclid()">⚡ Hitung Semua Metrik</button>
+        <div class="calc-err" id="eu-err"></div>
+        <div class="calc-result" id="eu-result">
+          <div class="result-header"><div class="rh-title">Hasil Analisis Spasial ℝⁿ</div></div>
+          <div class="result-rows" id="eu-rows"></div>
+        </div>
+      </div>
+      <div class="calc-hint">
+        <h3>Format Input</h3>
+        <p>Pisahkan komponen dengan koma. Dimensi u dan v harus sama.</p>
+        <div class="hint-examples">
+          <div class="hex">ℝ²: <span>3, 4</span></div>
+          <div class="hex">ℝ³: <span>1, -2, 5</span></div>
+          <div class="hex">ℝ⁴: <span>1, 0, 3, -2</span></div>
+        </div>
+        <p style="margin-top:.75rem;font-size:.78rem;">Angka desimal dan negatif didukung penuh.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- KALKULATOR SUBRUANG -->
+  <div class="calc-panel" id="calc-subspace">
+    <div class="sub-layout fade-up">
+      <div class="calc-main">
+        <h3>Evaluasi Pembuktian Subruang</h3>
+        <p class="csub">Pilih model himpunan W untuk diaudit melalui 4 kriteria ringkas.</p>
+        <div class="sub-select-wrap">
+          <select class="sub-select" id="sub-preset" onchange="runSubspace()">
+            <option value="plane">W = { (x, y, 0) | x, y ∈ ℝ } — Bidang z=0 di ℝ³</option>
+            <option value="line">W = { (x, y) | y = 2x } — Garis melalui origin di ℝ²</option>
+            <option value="circle">W = { (x, y) | x² + y² = 1 } — Lingkaran satuan di ℝ²</option>
+            <option value="quadrant">W = { (x, y) | x ≥ 0, y ≥ 0 } — Kuadran I di ℝ²</option>
+          </select>
+        </div>
+        <div id="sub-output"></div>
+      </div>
+      <div class="sub-info">
+        <h3>Mengapa 3 Saja?</h3>
+        <p style="font-size:.82rem;color:var(--text2);line-height:1.7;margin-bottom:1rem;">Sifat umum (komutatif, asosiatif, dll.) diwariskan otomatis dari ruang induk V. Kita cukup membuktikan stabilitas internal W.</p>
+        <div class="axiom-item"><div class="axiom-num">∅</div><span>W memuat vektor nol → tidak kosong</span></div>
+        <div class="axiom-item"><div class="axiom-num">+</div><span>Tertutup penjumlahan → tidak "keluar" dari W</span></div>
+        <div class="axiom-item"><div class="axiom-num">·</div><span>Tertutup perkalian skalar → skala apapun tetap di W</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="footer-brand">
+    <div class="brand-name">VektorSpace</div>
+    <p>Platform Pembelajaran Eksploratif Aljabar Linear.<br>Didesain interaktif untuk mahasiswa matematika & teknik.</p>
+  </div>
+  <div class="footer-links">
+    <a href="#visualizer">Visualisasi 3D</a>
+    <a href="#kurikulum">Kursus Kilat</a>
+    <a href="#kalkulator">Math Toolkit</a>
+  </div>
+  <div class="footer-copy">Three.js r128 · Space Grotesk · Outfit</div>
+</footer>
+
+<script>
+// ─────────────────────────────────────────────
+// THEME TOGGLE
+// ─────────────────────────────────────────────
+const themeBtn = document.getElementById('theme-toggle');
+let isDark = true;
+themeBtn.addEventListener('click', () => {
+  isDark = !isDark;
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  themeBtn.textContent = isDark ? '☀️' : '🌙';
+});
+
+// Mobile Menu
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+function closeMobileMenu(){ mobileMenu.classList.remove('open'); }
+
+// ─────────────────────────────────────────────
+// HERO THREE.JS CANVAS
+// ─────────────────────────────────────────────
+(function(){
+  const canvas = document.getElementById('hero-canvas');
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(45,1,0.1,100);
+  cam.position.set(3.5,2.5,4.5);
+  cam.lookAt(0,0,0);
+
+  function resize(){
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+    cam.aspect = canvas.clientWidth / canvas.clientHeight;
+    cam.updateProjectionMatrix();
+  }
+  resize();
+  new ResizeObserver(resize).observe(canvas);
+
+  // Partikel
+  const pGeo = new THREE.BufferGeometry();
+  const pPos = new Float32Array(120*3);
+  for(let i=0;i<120*3;i++) pPos[i]=(Math.random()-.5)*5;
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos,3));
+  const pMesh = new THREE.Points(pGeo, new THREE.PointsMaterial({color:0x7c6dff,size:.055}));
+  scene.add(pMesh);
+
+  // Sumbu basis animasi
+  const basesGeo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(0,0,0), new THREE.Vector3(2,0,0),
+    new THREE.Vector3(0,0,0), new THREE.Vector3(0,2,0),
+    new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,2)
+  ]);
+  const basesMat = new THREE.LineBasicMaterial({vertexColors:true});
+  const colors = new Float32Array([1,.3,.3,1,.3,.3, .3,1,.3,.3,1,.3, .3,.5,1,.3,.5,1]);
+  basesGeo.setAttribute('color', new THREE.BufferAttribute(colors,3));
+  const bases = new THREE.LineSegments(basesGeo, basesMat);
+  scene.add(bases);
+
+  const grid = new THREE.GridHelper(6,12,0x3333aa,0x222233);
+  scene.add(grid);
+
+  let t=0;
+  function animate(){
+    requestAnimationFrame(animate); t+=.004;
+    pMesh.rotation.y = t*.5;
+    pMesh.rotation.x = t*.25;
+    bases.rotation.y = t*.3;
+    renderer.render(scene,cam);
+  }
+  animate();
+})();
+
+
+// ─────────────────────────────────────────────
+// MAIN VIZ THREE.JS
+// ─────────────────────────────────────────────
+const vizCanvas = document.getElementById('viz-canvas');
+const vizRenderer = new THREE.WebGLRenderer({canvas:vizCanvas, antialias:true});
+vizRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
+vizRenderer.setClearColor(0x0a0a12,1);
+const vizScene = new THREE.Scene();
+const vizCam = new THREE.PerspectiveCamera(45,4/3,0.1,100);
+vizCam.position.set(4,3,5);
+const controls = new THREE.OrbitControls(vizCam, vizRenderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = .05;
+controls.maxDistance = 14;
+controls.minDistance = 2;
+
+function resizeViz(){
+  const w=vizCanvas.clientWidth, h=vizCanvas.clientHeight;
+  vizRenderer.setSize(w,h,false);
+  vizCam.aspect=w/h;
+  vizCam.updateProjectionMatrix();
+}
+resizeViz();
+new ResizeObserver(resizeViz).observe(vizCanvas);
+
+vizScene.add(new THREE.AxesHelper(3));
+vizScene.add(new THREE.GridHelper(6,12,0x334466,0x223355));
+vizScene.add(new THREE.AmbientLight(0xffffff,.7));
+const dl = new THREE.DirectionalLight(0xffffff,.8);
+dl.position.set(5,10,7);
+vizScene.add(dl);
+
+let arrowV1=null, arrowV2=null, modeObjs=[], vizMode='vectors';
+
+function updateVectors(){
+  modeObjs.forEach(o=>vizScene.remove(o)); modeObjs=[];
+  if(arrowV1) vizScene.remove(arrowV1);
+  if(arrowV2) vizScene.remove(arrowV2);
+
+  const v1x=+document.getElementById('v1x').value||0;
+  const v1y=+document.getElementById('v1y').value||0;
+  const v1z=+document.getElementById('v1z').value||0;
+  const v2x=+document.getElementById('v2x').value||0;
+  const v2y=+document.getElementById('v2y').value||0;
+  const v2z=+document.getElementById('v2z').value||0;
+
+  const u=new THREE.Vector3(v1x,v1y,v1z);
+  const v=new THREE.Vector3(v2x,v2y,v2z);
+  const O=new THREE.Vector3(0,0,0);
+
+  if(u.length()>.01){
+    arrowV1=new THREE.ArrowHelper(u.clone().normalize(),O,u.length(),0x7c6dff,.22,.1);
+    vizScene.add(arrowV1);
+  }
+  if(v.length()>.01){
+    arrowV2=new THREE.ArrowHelper(v.clone().normalize(),O,v.length(),0xffb347,.22,.1);
+    vizScene.add(arrowV2);
+  }
+
+  const dot=u.dot(v), nU=u.length(), nV=v.length();
+  let cosT=0, tDeg=0;
+  if(nU>.001&&nV>.001){
+    cosT=Math.max(-1,Math.min(1,dot/(nU*nV)));
+    tDeg=Math.acos(cosT)*(180/Math.PI);
+  }
+
+  document.getElementById('hud-v1').textContent=`${v1x.toFixed(2)}, ${v1y.toFixed(2)}, ${v1z.toFixed(2)}`;
+  document.getElementById('hud-v2').textContent=`${v2x.toFixed(2)}, ${v2y.toFixed(2)}, ${v2z.toFixed(2)}`;
+  document.getElementById('hud-angle').textContent=tDeg.toFixed(1)+'°';
+  document.getElementById('hud-dot').textContent=dot.toFixed(3);
+  document.getElementById('m-n1').textContent=nU.toFixed(3);
+  document.getElementById('m-n2').textContent=nV.toFixed(3);
+  document.getElementById('m-dot').textContent=dot.toFixed(3);
+  document.getElementById('m-cos').textContent=cosT.toFixed(3);
+
+  if(vizMode==='span' && nU>.1 && nV>.1 && Math.abs(Math.abs(cosT)-1)>.02){
+    const pG=new THREE.PlaneGeometry(9,9,4,4);
+    const pM=new THREE.MeshBasicMaterial({color:0x5544cc,side:THREE.DoubleSide,transparent:true,opacity:.18,wireframe:true});
+    const pl=new THREE.Mesh(pG,pM);
+    const nrm=new THREE.Vector3().crossVectors(u,v).normalize();
+    pl.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),nrm);
+    vizScene.add(pl); modeObjs.push(pl);
+  } else if(vizMode==='subspace'){
+    const sg=new THREE.GridHelper(10,22,0x00d4aa,0x007a66);
+    vizScene.add(sg); modeObjs.push(sg);
+  } else if(vizMode==='projection' && nV>.01){
+    const s=dot/(nV*nV);
+    const proj=v.clone().multiplyScalar(s);
+    if(proj.length()>.01){
+      const aP=new THREE.ArrowHelper(proj.clone().normalize(),O,proj.length(),0x00d4aa,.15,.08);
+      vizScene.add(aP); modeObjs.push(aP);
+    }
+    const lg=new THREE.BufferGeometry().setFromPoints([u,proj]);
+    const lM=new THREE.LineBasicMaterial({color:0xff6b9d,linewidth:2});
+    const ln=new THREE.Line(lg,lM);
+    vizScene.add(ln); modeObjs.push(ln);
+  }
+}
+
+function setMode(el,mode){
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  vizMode=mode;
+  updateVectors();
+}
+function randomVectors(){
+  ['v1x','v1y','v1z','v2x','v2y','v2z'].forEach(id=>{
+    document.getElementById(id).value=((Math.random()*4-2)).toFixed(1);
+  });
+  updateVectors();
+}
+(function vizLoop(){requestAnimationFrame(vizLoop);controls.update();vizRenderer.render(vizScene,vizCam);})();
+updateVectors();
+
+
+// ─────────────────────────────────────────────
+// E-LEARNING
+// ─────────────────────────────────────────────
+function openMateri(chip){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  document.querySelectorAll('.materi-panel').forEach(p=>p.classList.remove('open'));
+  const target=document.getElementById(chip.dataset.target);
+  if(target){
+    target.classList.add('open');
+    setTimeout(()=>target.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+  }
+}
+function doQuiz(el,correct){
+  const opts=el.closest('.quiz-options');
+  opts.querySelectorAll('.quiz-opt').forEach(o=>{o.classList.remove('correct','wrong');o.querySelector('.quiz-icon').textContent='';});
+  const fb=opts.parentElement.querySelector('.quiz-feedback');
+  if(correct){
+    el.classList.add('correct');
+    el.querySelector('.quiz-icon').textContent='✓';
+    fb.className='quiz-feedback show ok';
+    fb.textContent='✓ Tepat! Analisis logika Anda berjalan dengan benar.';
+  } else {
+    el.classList.add('wrong');
+    el.querySelector('.quiz-icon').textContent='✗';
+    fb.className='quiz-feedback show fail';
+    fb.textContent='✗ Belum tepat. Pelajari ulang formula di atas dan coba lagi!';
+  }
+}
+
+
+// ─────────────────────────────────────────────
+// KALKULATOR
+// ─────────────────────────────────────────────
+function switchCalc(btn,id){
+  document.querySelectorAll('.calc-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.calc-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('calc-'+id).classList.add('active');
+}
+function parseVec(s){return s.split(',').map(x=>parseFloat(x.trim())).filter(n=>!isNaN(n));}
+
+function calcEuclid(){
+  const errEl=document.getElementById('eu-err');
+  const res=document.getElementById('eu-result');
+  errEl.style.display='none'; res.classList.remove('show');
+  const U=parseVec(document.getElementById('eu-u').value);
+  const V=parseVec(document.getElementById('eu-v').value);
+  if(!U.length||!V.length){errEl.textContent='Input kosong. Gunakan format angka dipisah koma.';errEl.style.display='block';return;}
+  if(U.length!==V.length){errEl.textContent=`Dimensi tidak cocok: u memiliki ${U.length} komponen, v memiliki ${V.length} komponen.`;errEl.style.display='block';return;}
+  const n=U.length;
+  let su2=0,sv2=0,dot=0,d2=0;
+  for(let i=0;i<n;i++){su2+=U[i]*U[i];sv2+=V[i]*V[i];dot+=U[i]*V[i];d2+=(U[i]-V[i])**2;}
+  const nU=Math.sqrt(su2),nV=Math.sqrt(sv2),dist=Math.sqrt(d2);
+  let cosT=0,tStr='N/A';
+  if(nU>.0001&&nV>.0001){cosT=Math.max(-1,Math.min(1,dot/(nU*nV)));tStr=(Math.acos(cosT)*(180/Math.PI)).toFixed(2)+'°';}
+  const uU=U.map(x=>nU>0?(x/nU).toFixed(3):0);
+  const uV=V.map(x=>nV>0?(x/nV).toFixed(3):0);
+  const rows=[
+    ['Dimensi Terdeteksi','ℝ'+n,false],
+    ['Norm ‖u‖',nU.toFixed(5),false],
+    ['Norm ‖v‖',nV.toFixed(5),false],
+    ['Dot Product u·v',dot.toFixed(5),false],
+    ['Jarak Euklides d(u,v)',dist.toFixed(5),true],
+    ['cos θ',cosT.toFixed(5),false],
+    ['Sudut θ',tStr,false],
+    ['Unit û','('+uU.join(', ')+')',false],
+    ['Unit v̂','('+uV.join(', ')+')',false],
+  ];
+  document.getElementById('eu-rows').innerHTML=rows.map(([l,v,h])=>`<div class="result-row"><span class="rr-label">${l}</span><span class="rr-val${h?' highlight':''}">${v}</span></div>`).join('');
+  res.classList.add('show');
+}
+
+// Subruang data
+const subData={
+  plane:{
+    title:'W = { (x, y, 0) | x, y ∈ ℝ } di ℝ³',
+    ok:true,
+    steps:[
+      {ok:true,name:'1. Keberadaan Vektor Nol',detail:'Substitusi x=0, y=0 → (0,0,0). Komponen z = 0 sesuai definisi W. Vektor Nol ∈ W. ✓'},
+      {ok:true,name:'2. Tertutup Penjumlahan',detail:'u=(x₁,y₁,0), v=(x₂,y₂,0) ∈ W → u+v=(x₁+x₂, y₁+y₂, 0). Elemen ketiga tetap 0. Maka u+v ∈ W. ✓'},
+      {ok:true,name:'3. Tertutup Perkalian Skalar',detail:'k skalar, u=(x₁,y₁,0) ∈ W → k·u=(kx₁,ky₁,0). Elemen z tetap 0. Maka k·u ∈ W. ✓'}
+    ],
+    verdict:'W terbukti MEMENUHI ketiga kriteria. W adalah SUBRUANG dari ℝ³.'
+  },
+  line:{
+    title:'W = { (x, y) | y = 2x } di ℝ²',
+    ok:true,
+    steps:[
+      {ok:true,name:'1. Keberadaan Vektor Nol',detail:'x=0, y=0: 0 = 2(0) ⟹ 0 = 0. Benar. (0,0) ∈ W. ✓'},
+      {ok:true,name:'2. Tertutup Penjumlahan',detail:'u=(x₁,2x₁), v=(x₂,2x₂) → u+v=(x₁+x₂, 2x₁+2x₂)=(x₁+x₂, 2(x₁+x₂)). Relasi y=2x terjaga. ✓'},
+      {ok:true,name:'3. Tertutup Perkalian Skalar',detail:'k skalar, u=(x₁,2x₁) → k·u=(kx₁,2kx₁). y=2x masih terpenuhi. ✓'}
+    ],
+    verdict:'W terbukti MEMENUHI ketiga kriteria. W adalah SUBRUANG dari ℝ².'
+  },
+  circle:{
+    title:'W = { (x, y) | x² + y² = 1 } di ℝ²',
+    ok:false,
+    steps:[
+      {ok:false,name:'1. Keberadaan Vektor Nol',detail:'(0,0): 0² + 0² = 0 ≠ 1. Persamaan tidak terpenuhi! Vektor Nol ∉ W. GAGAL ✗'},
+      {ok:false,name:'2. Tertutup Penjumlahan',detail:'u=(1,0) dan v=(0,1) ∈ W. u+v=(1,1): 1²+1²=2 ≠ 1. Hasil jumlah keluar dari W. GAGAL ✗'},
+      {ok:false,name:'3. Tertutup Perkalian Skalar',detail:'u=(1,0) ∈ W, k=3: k·u=(3,0): 3²+0²=9 ≠ 1. Hasil keluar dari lingkaran. GAGAL ✗'}
+    ],
+    verdict:'W GAGAL memenuhi kriteria. W BUKAN subruang dari ℝ² (hanya kulit lingkaran tanpa titik asal).'
+  },
+  quadrant:{
+    title:'W = { (x, y) | x ≥ 0, y ≥ 0 } di ℝ²',
+    ok:false,
+    steps:[
+      {ok:true,name:'1. Keberadaan Vektor Nol',detail:'x=0 ≥ 0 dan y=0 ≥ 0. Bernilai sah. (0,0) ∈ W. ✓'},
+      {ok:true,name:'2. Tertutup Penjumlahan',detail:'u=(x₁,y₁), v=(x₂,y₂) dengan semua ≥ 0. x₁+x₂ ≥ 0 dan y₁+y₂ ≥ 0. Aman. ✓'},
+      {ok:false,name:'3. Tertutup Perkalian Skalar',detail:'u=(2,3) ∈ W, k=−2: k·u=(−4,−6). Komponen negatif → ∉ W. GAGAL ✗'}
+    ],
+    verdict:'W GAGAL pada uji skalar negatif. W BUKAN subruang dari ℝ².'
+  }
+};
+
+function runSubspace(){
+  const key=document.getElementById('sub-preset').value;
+  const d=subData[key];
+  const steps=d.steps.map(s=>`
+    <div class="step-card ${s.ok?'ok':'fail'}">
+      <div class="step-header">
+        <div class="step-icon-badge ${s.ok?'ok':'fail'}">${s.ok?'✓':'✗'}</div>
+        <span class="step-name">${s.name}</span>
+      </div>
+      <div class="step-detail">${s.detail}</div>
+    </div>
+  `).join('');
+  const verdict=`<div class="verdict ${d.ok?'yes':'no'}"><span class="verdict-icon">${d.ok?'✅':'❌'}</span><span>${d.verdict}</span></div>`;
+  document.getElementById('sub-output').innerHTML=`<div class="sub-steps">${steps}${verdict}</div>`;
+}
+runSubspace();
+
+
+// ─────────────────────────────────────────────
+// SCROLL ANIMATIONS
+// ─────────────────────────────────────────────
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:.08});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
